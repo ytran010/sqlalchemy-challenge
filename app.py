@@ -1,12 +1,7 @@
-# %matplotlib inline
-# from matplotlib import style
-# style.use('fivethirtyeight')
-# import matplotlib.pyplot as plt
+
 import numpy as np
-# import pandas as pd
 import datetime as dt
 from datetime import timedelta
-#  Python SQL toolkit and Object Relational Mapper
 import sqlalchemy
 from sqlalchemy.ext.automap import automap_base
 from sqlalchemy.orm import Session
@@ -121,23 +116,57 @@ def tobs():
         all_tobs.append(tobs_dict)
 
     return jsonify(all_tobs)
+
 @app.route("/api/v1.0/<start>")
 # When given the start only, calculate TMIN, TAVG, and TMAX for all dates greater than and equal to the start date.
-def start():
+def insert_start_date(start):
+
     session = Session(engine)
 
-    session.query(Measurement.date)
 
+    start_results = session.query(Measurement.date, func.min(Measurement.tobs), \
+        func.avg(Measurement.tobs), func.max(Measurement.tobs)).\
+        group_by(Measurement.date).\
+        filter(Measurement.date>=start).all()
+
+    session.close()
+
+    all_start = []
+    for date, min, avg, max in start_results:
+        start_dict = {}
+        start_dict["date"] = start
+        start_dict["temp_min"] = min
+        start_dict["temp_avg"] = avg
+        start_dict["temp_max"] = max
+        all_start.append(start_dict)
+
+        return jsonify(all_start)
 
 
 @app.route("/api/v1.0/<start>/<end>")
 # When given the start and the end date, calculate the TMIN, TAVG, and TMAX for dates between the start and end date inclusive.
+def insert_start_end_date(start,end):
+    session = Session(engine)
 
+    
 
+    start_end_results = session.query(Measurement.date, func.min(Measurement.tobs), \
+        func.avg(Measurement.tobs), func.max(Measurement.tobs)).\
+            group_by(Measurement.date).\
+            filter(Measurement.date>=start, Measurement.date<=end).all()
 
+    session.close()
 
+    all_start_end = []
+    for date, min, avg, max in start_end_results:
+        start_end_dict = {}
+        start_end_dict["date"] = date
+        start_end_dict["temp_min"] = min
+        start_end_dict["temp_avg"] = avg
+        start_end_dict["temp_max"] = max
+        all_start_end.append(start_end_dict)
 
-
+        return jsonify(all_start_end)
 
 if __name__ == '__main__':
     app.run(debug=True)
