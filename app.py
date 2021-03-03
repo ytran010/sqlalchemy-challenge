@@ -124,17 +124,15 @@ def insert_start_date(start):
     session = Session(engine)
 
 
-    start_results = session.query(Measurement.date, func.min(Measurement.tobs), \
+    start_results = session.query(func.min(Measurement.tobs), \
         func.avg(Measurement.tobs), func.max(Measurement.tobs)).\
-        group_by(Measurement.date).\
         filter(Measurement.date>=start).all()
 
     session.close()
 
     all_start = []
-    for date, min, avg, max in start_results:
+    for min, avg, max in start_results:
         start_dict = {}
-        start_dict["date"] = start
         start_dict["temp_min"] = min
         start_dict["temp_avg"] = avg
         start_dict["temp_max"] = max
@@ -150,17 +148,15 @@ def insert_start_end_date(start,end):
 
     
 
-    start_end_results = session.query(Measurement.date, func.min(Measurement.tobs), \
+    start_end_results = session.query(func.min(Measurement.tobs), \
         func.avg(Measurement.tobs), func.max(Measurement.tobs)).\
-            group_by(Measurement.date).\
             filter(Measurement.date>=start, Measurement.date<=end).all()
 
     session.close()
 
     all_start_end = []
-    for date, min, avg, max in start_end_results:
+    for min, avg, max in start_end_results:
         start_end_dict = {}
-        start_end_dict["date"] = date
         start_end_dict["temp_min"] = min
         start_end_dict["temp_avg"] = avg
         start_end_dict["temp_max"] = max
